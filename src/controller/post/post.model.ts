@@ -1,9 +1,11 @@
 import * as mongoose from 'mongoose';
 
 const postSchema = new mongoose.Schema({
-    author: String,
+    authorId: String,
     content: String,
     title: String
+}, {
+    collection: "post"
 })
 
 const PostModel = mongoose.model<IPost & mongoose.Document>('PostSchema', postSchema);
@@ -11,7 +13,7 @@ const PostModel = mongoose.model<IPost & mongoose.Document>('PostSchema', postSc
 export default PostModel;
 
 export interface IPost {
-    author: string;
+    authorId: string;
     content: string;
     title: string
 }
