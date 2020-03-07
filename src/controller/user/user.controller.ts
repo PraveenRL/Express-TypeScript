@@ -1,5 +1,5 @@
 import * as bcrypt from 'bcryptjs';
-import { Router, Request, Response, NextFunction } from 'express';
+import { Router, Request, Response, NextFunction, request } from 'express';
 
 import { IController } from '../../interfaces/controller.interface';
 import UserDto from './user.dto';
@@ -9,6 +9,7 @@ import HttpException from '../../exceptions/http.exceptions';
 import authMiddleWare from '../../middleware/auth.middleware';
 import PostModel from '../../controller/post/post.model';
 import RequestWithUser from '../../interfaces/requestWithUser.interface';
+import CreatePostDto from '../../controller/post/post.dto';
 
 // import * as express from 'express';
 class UserController implements IController {
@@ -17,6 +18,7 @@ class UserController implements IController {
 
     constructor() {
         this.initializeRoutes();
+        this.router.use(this.path, authMiddleWare);
     }
 
     private initializeRoutes() {
@@ -25,7 +27,9 @@ class UserController implements IController {
         this.router.get(`${this.path}/logout`, this.logout);
         this.router
             .all(`${this.path}*`, authMiddleWare)
-            .post(this.path, authMiddleWare, this.createPost);
+            .post(`${this.path}/createPost`, authMiddleWare, this.createPost)
+            .get(`${this.path}/getAllPost`, this.getAllPost)
+            .post(`${this.path}/createPostTwoWayRefering`, this.createPostTwoWayRefering);
     }
 
     private registration = async (request: Request, response: Response, next: NextFunction) => {
@@ -71,11 +75,32 @@ class UserController implements IController {
     private createPost = async (request: RequestWithUser, response: Response) => {      //Token requires to post
         const postData = request.body;
         const createdPost = new PostModel({
-            content: request.user.email,
-            title: request.user.name,
-            authorId: request.user._id
+            ...postData,
+            authorId: request.user._id  //Relationship One-To-Many(1:N)
         });
         const savedPost = await createdPost.save();
+        // await savedPost.populate('authorId').execPopulate();          //Populate -- give all values
+        // await savedPost.populate('authorId', 'name').execPopulate();  // [first = find id, second  only]
+        await savedPost.populate('authorId', '-password').execPopulate();// [first = find id, second '-'omit]
+        response.send(savedPost);
+    }
+
+    private getAllPost = async (request: Request, response: Response) => {
+        const posts = await PostModel.find().populate('authorId', '-password');
+        response.send(posts);
+    }
+
+    private createPostTwoWayRefering = async (request: RequestWithUser, response: Response) => {
+        const postData: CreatePostDto = request.body;
+        const createdPost = new PostModel({
+            ...postData,
+            authorsId: [request.user._id]
+        });
+        const user = await UserModel.findById(request.user._id);
+        user.posts = [...user.posts, createdPost._id];
+        await user.save();
+        const savedPost = await createdPost.save();
+        await savedPost.populate('authorsId', '-password').execPopulate();
         response.send(savedPost);
     }
 

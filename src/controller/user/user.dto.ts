@@ -1,4 +1,4 @@
-import { IsString } from 'class-validator';
+import { IsString, IsObject } from 'class-validator';
 
 class UserDto {
 
@@ -10,6 +10,9 @@ class UserDto {
 
     @IsString()
     public password: string;
+
+    @IsObject()
+    public address: object;
 
 }
 

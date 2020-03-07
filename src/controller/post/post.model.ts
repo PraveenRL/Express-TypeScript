@@ -1,7 +1,16 @@
 import * as mongoose from 'mongoose';
 
 const postSchema = new mongoose.Schema({
-    authorId: String,
+    authorId: {
+        ref: "UserSchema",
+        type: mongoose.Schema.Types.ObjectId
+    },
+    authorsId: [    //Two way refering
+        {
+            ref: "UserSchema",
+            type: mongoose.Schema.Types.ObjectId
+        }
+    ],
     content: String,
     title: String
 }, {
@@ -14,6 +23,7 @@ export default PostModel;
 
 export interface IPost {
     authorId: string;
+    authorsId: Array<any>;
     content: string;
     title: string
 }

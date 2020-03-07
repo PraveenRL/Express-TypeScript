@@ -1,6 +1,6 @@
 // dto - data transfer object (DTO)
 
-import { IsString } from 'class-validator';
+import { IsString, IsArray } from 'class-validator';
 
 class CreatePostDto {
 
@@ -12,6 +12,9 @@ class CreatePostDto {
 
     @IsString()
     public title: string
+
+    @IsArray()
+    public authorsId: Array<any>
 
 }
 

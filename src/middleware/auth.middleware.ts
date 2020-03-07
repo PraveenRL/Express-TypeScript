@@ -9,7 +9,7 @@ import HttpException from '../exceptions/http.exceptions';
 async function authMiddleWare(request: RequestWithUser, response: Response, next: NextFunction) {
     const cookies = request.cookies;
     if (cookies && cookies.Authorization) {
-        const secret = "user-secret-token";
+        const secret = "user-token-secret";
         try {
             const verificationResponse = jwt.verify(cookies.Authorization, secret) as IDataStoredToken;
             const id = verificationResponse._id;
