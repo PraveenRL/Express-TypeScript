@@ -2,7 +2,7 @@ import { Response, NextFunction } from 'express';
 import * as jwt from 'jsonwebtoken';
 
 import RequestWithUser from '../interfaces/requestWithUser.interface';
-import UserModel, { IUser } from '../controller/user/user.model';
+import UserModel from '../controller/user/user.model';
 import { IDataStoredToken } from '../helper/token';
 import HttpException from '../exceptions/http.exceptions';
 

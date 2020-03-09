@@ -4,13 +4,14 @@ import * as mongoose from 'mongoose';
 import * as cookieParser from 'cookie-parser';
 
 import errorMiddleWare from './middleware/error.middleware';
+import IController from './interfaces/controller.interface';
 
 class App {
     public app: express.Application;
     public port: number;
     public mongoDbConfig: string = "mongodb://localhost:27017/exty"
 
-    constructor(controllers, port) {
+    constructor(controllers: IController[], port) {
         this.app = express();
         this.port = port;
         this.initializeMiddlewares();
@@ -18,13 +19,19 @@ class App {
         this.initializeControllers(controllers);
         this.initializeErrorHandling();
     }
+    
+    public listen() {
+        this.app.listen(this.port, () => {
+            console.log(`App listening on the port ${this.port}`);
+        });
+    }
 
     private initializeMiddlewares() {
         this.app.use(bodyParser.json());
         this.app.use(cookieParser());
     }
 
-    private initializeControllers(controllers) {
+    private initializeControllers(controllers: IController[]) {
         controllers.forEach((controller) => {
             this.app.use('/', controller.router);
         });
@@ -45,11 +52,7 @@ class App {
         }).catch(error => console.log(`Database could not be connected ${error}`))
     }
 
-    public listen() {
-        this.app.listen(this.port, () => {
-            console.log(`App listening on the port ${this.port}`);
-        });
-    }
+   
 }
 
 export default App;

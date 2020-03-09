@@ -1,7 +1,7 @@
 import * as bcrypt from 'bcryptjs';
-import { Router, Request, Response, NextFunction, request } from 'express';
+import { Router, Request, Response, NextFunction } from 'express';
 
-import { IController } from '../../interfaces/controller.interface';
+import IController from '../../interfaces/controller.interface';
 import UserDto from './user.dto';
 import UserModel from './user.model';
 import Token, { IToken } from '../../helper/token';
@@ -25,11 +25,18 @@ class UserController implements IController {
         this.router.post(`${this.path}/register`, this.registration);
         this.router.post(`${this.path}/login`, this.logginIn);
         this.router.get(`${this.path}/logout`, this.logout);
+
         this.router
             .all(`${this.path}*`, authMiddleWare)
             .post(`${this.path}/createPost`, authMiddleWare, this.createPost)
             .get(`${this.path}/getAllPost`, this.getAllPost)
             .post(`${this.path}/createPostTwoWayRefering`, this.createPostTwoWayRefering);
+
+        this.router.post(`${this.path}/aggregationMatch`, this.aggregationMatch);
+    }
+
+    private createCookie(tokenData: IToken) {
+        return `Authorization=${tokenData.token}; HttpOnly; Max-Age=${tokenData.expiresIn}`
     }
 
     private registration = async (request: Request, response: Response, next: NextFunction) => {
@@ -90,6 +97,7 @@ class UserController implements IController {
         response.send(posts);
     }
 
+    //Relationship Many-To-Many(N:M) => Two Way Refering 
     private createPostTwoWayRefering = async (request: RequestWithUser, response: Response) => {
         const postData: CreatePostDto = request.body;
         const createdPost = new PostModel({
@@ -104,9 +112,21 @@ class UserController implements IController {
         response.send(savedPost);
     }
 
-    private createCookie(tokenData: IToken) {
-        return `Authorization=${tokenData.token}; HttpOnly; Max-Age=${tokenData.expiresIn}`
+    //Aggregation
+    private aggregationMatch = async (request: Request, response: Response) => {
+        const arrayOfPosts = await PostModel.aggregate(
+            [
+                {
+                    $match: {
+                        email: request.body.email
+                    }
+                }
+            ]
+        );
+        response.send(arrayOfPosts)
     }
+
+
 }
 
 export default UserController;
