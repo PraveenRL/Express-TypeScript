@@ -1,9 +1,12 @@
-import App from './app';
 import { createConnection } from 'typeorm';
 import 'reflect-metadata';
 
+import App from './app';
 import config from './ormconfig';
 import PostController from './controllers/post/post.controller';
+import UsersController from './controllers/users/users.controller';
+import AddressController from './controllers/address/address.controller';
+import CategoryController from './controllers/category/category.controller';
 
 (async () => {
     try {
@@ -15,7 +18,10 @@ import PostController from './controllers/post/post.controller';
     }
     const app = new App(
         [
-            new PostController()
+            new PostController(),
+            new UsersController(),
+            new AddressController(),
+            new CategoryController
         ],
         5000
     );

@@ -1,21 +1,11 @@
 import * as express from 'express';
 import * as bodyParser from 'body-parser';
 import * as cookieParser from 'cookie-parser';
-import { Pool, Client } from 'pg';
-
-
 
 class App {
     public app: express.Application;
     public port: number;
 
-    // public pool = new Pool({
-    //     user: "me",
-    //     host: "localhost",
-    //     database: "api",
-    //     password: "password",
-    //     port: 5432
-    // })
 
     constructor(controllers, port) {
         this.app = express();
@@ -24,8 +14,6 @@ class App {
         this.connectToDatabase();
         this.initializeControllers(controllers);
         this.initializeErrorHandling();
-
-        // this.getMethod();
     }
 
     public listen() {
@@ -41,16 +29,9 @@ class App {
 
     private initializeControllers(controllers) {
         controllers.forEach((controller) => {
-            this.app.use('/', controller.router);
+            this.app.use('/api', controller.router);
         });
     }
-
-    // private getMethod(){
-    //     this.app.get('/get', async(request, response) => {
-    //         const result = await this.pool.query("SELECT * FROM users");
-    //         response.send(result.rows);
-    //     })
-    // }
 
     private initializeErrorHandling() {
 
@@ -61,6 +42,13 @@ class App {
     }
 
 
+    // public pool = new Pool({
+    //     user: "me",
+    //     host: "localhost",
+    //     database: "api",
+    //     password: "password",
+    //     port: 5432
+    // })
 }
 
 export default App;
