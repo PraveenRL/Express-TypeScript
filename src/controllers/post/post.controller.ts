@@ -11,7 +11,7 @@ class PostController {
 
     constructor() {
         this.initializeRoutes();
-    }
+    } 
 
     private initializeRoutes() {
         this.router.post(`${this.path}/create`, this.createPost);
