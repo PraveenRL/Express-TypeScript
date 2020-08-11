@@ -1,0 +1,23 @@
+{
+    "compilerOptions": {
+        "sourceMap": true,
+        "outDir": "./dist",
+        "baseUrl": "./src",
+        "moduleResolution": "node",
+        "strict": false,
+        "alwaysStrict": true,
+        "strictNullChecks": true,
+        "strictPropertyInitialization": false,
+        "experimentalDecorators": true,
+        "target": "es2017",
+        "lib": [
+            "ES2017"
+        ]
+    },
+    "include": [
+        "src/**/*.ts"
+    ],
+    "exclude": [
+        "node_modules"
+    ]
+}
