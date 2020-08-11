@@ -1,7 +1,7 @@
 import * as bcrypt from 'bcryptjs';
 import * as jwt from 'jsonwebtoken';
 
-import { poolFunction } from '../../config/database';
+import { poolFunction, redisFunction } from '../../config/database';
 import { ICreateUser, ILogin } from "../interfaces/create-user.interface";
 import { IDataStoredToken, IRefreshToken } from '../interfaces/token.interface';
 import { HttpException } from '../exceptions/http.exception';
@@ -82,6 +82,49 @@ export class AuthenticationService {
         }
     }
 
+    public async registerRedisFromService(requestBody) {
+        try {
+            let redis = redisFunction();
+            const hashedPassword: string = await bcrypt.hash(requestBody.password, 10);
+
+            let saveObj = {
+                userName: requestBody.userName,
+                passwordHashed: hashedPassword
+            }
+
+            redis.set('loginCredentials', JSON.stringify(saveObj), (error, result) => {
+                if (error || !result) {
+                    console.log('Could not sign up', error)
+                    throw new HttpException(400, "Could not sign up");
+                } else {
+                    return result;
+                }
+            })
+        }
+        catch (error) {
+            throw error;
+        }
+    }
+
+    public async loginRedisFromService(result, requestBody) {
+        try {
+            let resultObj = JSON.parse(result);
+            let isPasswordMatching = await bcrypt.compare(requestBody.password, resultObj.passwordHashed);
+
+            if (isPasswordMatching && resultObj.userName === requestBody.userName) {
+                let tokenData = this.createToken(resultObj.userName);
+                console.log(tokenData)
+                return tokenData;
+            }
+            else {
+                return false;
+            }
+        }
+        catch (error) {
+            throw error;
+        }
+    }
+
     public createToken(userId: string) {
         const expiresIn = 60 * 60;
         const secret = '' + process.env.JWT_SECRET;
@@ -95,7 +138,8 @@ export class AuthenticationService {
         return {
             expiresIn,
             accessToken: jwt.sign(dataStoredInToken, secret, { expiresIn }),
-            refreshToken: refreshRandomToken
+            refreshToken: refreshRandomToken,
+            userName: userId
         }
     }
 

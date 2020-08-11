@@ -9,7 +9,7 @@ export function validateEnv() {
         DB_HOST: host(),
         DB_PORT: port(),
         DB_DATABASE: str(),
-        REDIS_PORT: port(),
+        REDIS_PORT: num(),
         REDIS_HOST: host(),
         REDIS_DB: num(),
         REDIS_PASSWORD: str()
